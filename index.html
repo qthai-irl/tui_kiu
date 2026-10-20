@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>bi mat quoc gia cua quang thai</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fde8ee; --bg2:#f6d9f0; --ink:#3a1230; --soft:#7a4a6d; --rose:#d6336c; --rose-d:#a81f52;
+  --card:#fffafc; --line:#f0c3d3; --ok:#2f9e63; --bad:#c92a2a;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#2a0f25; --bg2:#3b1536; --ink:#ffeaf2; --soft:#e1b3cb; --rose:#ff7aa8; --rose-d:#ff9fc0;
+    --card:#3d1a38; --line:#6b2d5f; --ok:#5fd394; --bad:#ff8787;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2a0f25; --bg2:#3b1536; --ink:#ffeaf2; --soft:#e1b3cb; --rose:#ff7aa8; --rose-d:#ff9fc0;
+  --card:#3d1a38; --line:#6b2d5f; --ok:#5fd394; --bad:#ff8787;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{
+  margin:0; min-height:100vh; color:var(--ink);
+  background:linear-gradient(160deg,var(--bg),var(--bg2)); background-color:var(--bg);
+  font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+  line-height:1.6; overflow-x:hidden;
+}
+main{max-width:520px; margin:0 auto; padding:36px 20px 56px}
+.dots{display:flex; gap:8px; margin-bottom:14px}
+.dots i{flex:1; height:6px; border-radius:3px; background:var(--line)}
+.dots i.on{background:var(--rose)}
+.box{background:var(--card); border:2px solid var(--line); border-radius:22px; padding:22px 20px}
+.box h2{margin:0 0 14px; font-size:18px}
+button{font:inherit; font-weight:600; border-radius:999px; padding:12px 22px; cursor:pointer; border:2px solid var(--rose)}
+button:focus-visible,.cell:focus-visible,.opt:focus-visible,input:focus-visible{outline:3px solid var(--rose); outline-offset:2px}
+.primary{background:var(--rose); color:#fff}
+.primary:hover{background:var(--rose-d); border-color:var(--rose-d)}
+.ghost{background:transparent; color:var(--rose-d)}
+.ghost:hover{background:var(--line)}
+.robot{display:flex; align-items:center; gap:14px; padding:16px; border:2px solid var(--line); border-radius:12px; cursor:pointer; background:transparent; width:100%; text-align:left; color:var(--ink); font-weight:500}
+.tick{width:28px; height:28px; border:2px solid var(--soft); border-radius:6px; display:grid; place-items:center; flex:none; font-size:18px; color:#fff}
+.tick.spin{border-radius:50%; border-color:var(--line); border-top-color:var(--rose); animation:sp .8s linear infinite}
+.tick.done{background:var(--ok); border-color:var(--ok)}
+@keyframes sp{to{transform:rotate(360deg)}}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+.cell{aspect-ratio:1; font-size:40px; border-radius:12px; border:3px solid transparent; background:var(--line); cursor:pointer; padding:0}
+.cell[aria-pressed="true"]{border-color:var(--rose); transform:scale(.92)}
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.opt{background:transparent; color:var(--ink); border:2px solid var(--line); border-radius:14px; padding:14px 10px}
+.opt:hover{border-color:var(--rose)}
+.code{font-family:"Playfair Display",Georgia,serif; font-style:italic; font-weight:800; font-size:44px; letter-spacing:.08em; text-align:center; padding:10px; border-radius:12px; background:repeating-linear-gradient(115deg,var(--line) 0 8px,transparent 8px 16px); color:var(--rose-d); user-select:none; transform:skewX(-8deg)}
+input{width:100%; font:inherit; font-size:18px; padding:13px 14px; border-radius:12px; border:2px solid var(--line); background:var(--card); color:var(--ink); margin:14px 0}
+.msg{min-height:1.6em; margin:12px 0 0; font-size:15px; color:var(--soft)}
+.msg.bad{color:var(--bad)}
+.msg.ok{color:var(--ok)}
+.row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+.final{text-align:center}
+.final h2{font-family:"Playfair Display",Georgia,serif; font-style:italic; font-size:clamp(28px,8vw,38px); color:var(--rose); margin:0 0 14px}
+.pad{position:relative; height:290px; border-radius:16px; overflow:hidden; touch-action:none}
+.pad canvas{position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; transition:opacity .9s}
+.msgbox{background:linear-gradient(135deg,var(--rose),#9c36b5); color:#fff; border-radius:16px; padding:20px 18px; font-size:17px; line-height:1.65; text-align:left; min-height:170px; position:relative}
+.pad .msgbox{position:absolute; inset:0; border-radius:0; overflow:auto}
+.msgbox.typing::after{content:"|"; margin-left:2px; animation:bl .8s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.voice{margin-top:16px; padding:14px; border:2px solid var(--line); border-radius:16px; background:var(--card); text-align:left}
+.voice p{margin:0 0 8px; font-weight:600; color:var(--rose-d); font-size:15px}
+.voice audio{width:100%; display:block}
+.cover{position:fixed; inset:0; z-index:20; display:grid; place-content:center; justify-items:center; gap:18px; text-align:center; padding:24px; background:linear-gradient(160deg,var(--bg),var(--bg2)); background-color:var(--bg)}
+.cover h1{margin:0; font-family:"Playfair Display",Georgia,serif; font-style:italic; font-size:clamp(32px,10vw,46px); color:var(--rose)}
+.cover p{margin:0; color:var(--soft)}
+.cover.hide{display:none}
+.mtog{position:fixed; right:14px; top:calc(12px + env(safe-area-inset-top,0px)); z-index:15; width:44px; height:44px; padding:0; border-radius:50%; background:var(--card); color:var(--rose-d); font-size:20px; display:none}
+.mtog.on{display:block}
+.shake{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.petal{position:fixed; top:-40px; z-index:5; pointer-events:none; animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(420deg); opacity:.85}}
+@media (prefers-reduced-motion:reduce){.msgbox.typing::after{animation:none}.petal{animation-duration:.01s!important}.shake,.tick.spin{animation:none}}
+</style>
+</head>
+<body>
+<audio id="nhac" loop preload="auto"></audio>
+<div class="cover" id="cover"><h1>Chúc mừng 20/10</h1><p>Chạm vào nút bên dưới để mở nhé</p><button class="primary" id="open">💌 Bấm để mở</button></div>
+<button class="mtog" id="mtog" aria-label="Bật hoặc tắt nhạc">🔊</button>
+<main>
+  <div class="dots" id="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  <section class="box" id="stage" aria-live="polite"></section>
+</main>
+
+<script>
+(function(){
+  var AUDIO_SRC="nhac.mp3";
+  var stage=document.getElementById('stage'), dots=document.querySelectorAll('#dots i');
+  function el(h){var d=document.createElement('div'); d.innerHTML=h; return d.firstElementChild;}
+  function type(node,text,cb){
+    var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){node.textContent=text; if(cb)cb(); return;}
+    var k=0; node.textContent=''; node.classList.add('typing');
+    var iv=setInterval(function(){
+      k++; node.textContent=text.slice(0,k);
+      if(k>=text.length){clearInterval(iv); node.classList.remove('typing'); if(cb)cb();}
+    },55);
+  }
+  function setDots(n){dots.forEach(function(d,i){d.className=i<n?'on':'';});}
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function fail(box,m,text){m.className='msg bad'; m.textContent=text; box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');}
+  function go(n){setDots(n); stage.innerHTML=''; [s0,s1,s2,s3,s4,fin][n]();}
+
+  function s0(){
+    var b=el('<div><h2>Bước 1: Viết ngày hôm nay</h2><div class="pad" id="pad"><div class="msgbox" id="mb" aria-live="polite"></div><canvas id="cv" aria-label="Vùng viết tay"></canvas></div><p class="msg" id="m">Dùng ngón tay viết “20/10” lên khung hồng.</p><div class="row"><button class="primary" id="nx" style="display:none">Tiếp tục</button></div></div>');
+    stage.appendChild(b);
+    var pad=b.querySelector('#pad'), cv=b.querySelector('#cv'), mb=b.querySelector('#mb'), m=b.querySelector('#m'), nx=b.querySelector('#nx');
+    var dpr=window.devicePixelRatio||1, W=pad.clientWidth, H=pad.clientHeight;
+    cv.width=W*dpr; cv.height=H*dpr;
+    var c=cv.getContext('2d'); c.scale(dpr,dpr);
+    var rose=getComputedStyle(document.documentElement).getPropertyValue('--rose').trim()||'#d6336c';
+    c.fillStyle=rose; c.fillRect(0,0,W,H);
+    c.fillStyle='rgba(255,255,255,.9)'; c.textAlign='center'; c.font='600 20px "Be Vietnam Pro",system-ui,sans-serif';
+    c.fillText('Viết 20/10 vào đây',W/2,H/2-6);
+    c.font='400 15px "Be Vietnam Pro",system-ui,sans-serif'; c.fillText('Bằng ngón tay hoặc chuột',W/2,H/2+20);
+    var COLS=14, ROWS=7, hit={}, count=0, last=null, done=false;
+    function mark(x,y){
+      var cx=Math.floor(x/W*COLS), cy=Math.floor(y/H*ROWS);
+      for(var dx=-1;dx<=1;dx++)for(var dy=-1;dy<=1;dy++){
+        var a=cx+dx,d=cy+dy; if(a<0||d<0||a>=COLS||d>=ROWS)continue;
+        var key=a+','+d; if(!hit[key]){hit[key]=1;count++;}
+      }
+    }
+    function pos(e){var r=cv.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top];}
+    function line(a,b2){
+      c.globalCompositeOperation='destination-out'; c.lineCap='round'; c.lineJoin='round'; c.lineWidth=34;
+      c.beginPath(); c.moveTo(a[0],a[1]); c.lineTo(b2[0],b2[1]); c.stroke();
+    }
+    function finish(){
+      if(done)return; done=true; cv.style.opacity='0'; cv.style.pointerEvents='none';
+      m.className='msg ok'; m.textContent='Đúng rồi! Thông điệp đã hiện ra.';
+      type(mb,'Co gang di toi cuoi de nhan 100$🤑.',function(){nx.style.display='';});
+    }
+    cv.addEventListener('pointerdown',function(e){
+      if(done)return; cv.setPointerCapture(e.pointerId); last=pos(e); line(last,last); mark(last[0],last[1]);
+    });
+    cv.addEventListener('pointermove',function(e){
+      if(done||!last)return; var p=pos(e); line(last,p); mark(p[0],p[1]); last=p;
+      if(count>=COLS*ROWS*0.5)finish();
+    });
+    function up(){last=null;}
+    cv.addEventListener('pointerup',up); cv.addEventListener('pointercancel',up);
+    nx.onclick=function(){go(1);};
+  }
+
+  function s1(){
+    var b=el('<div><h2>Bước 2: Bạn có yêu femoy không</h2><button class="robot" id="r"><span class="tick" id="t"></span><span>Tôi yêu femboy</span></button><p class="msg" id="m"></p></div>');
+    stage.appendChild(b);
+    var r=b.querySelector('#r'), t=b.querySelector('#t'), m=b.querySelector('#m'), busy=false;
+    r.onclick=function(){
+      if(busy) return; busy=true; t.className='tick spin'; m.textContent='Đang kiểm tra...';
+      setTimeout(function(){t.className='tick done'; t.textContent='✓'; m.className='msg ok'; m.textContent='Xác minh xong. Đúng là con người, và còn rất dễ thương.'; setTimeout(function(){go(2);},1100);},1500);
+    };
+  }
+
+  function s2(){
+    var items=[['🌸',1],['🌷',1],['🌹',1],['🌺',1],['🍕',0],['🚗',0],['🧦',0],['📚',0],['🐟',0]];
+    shuffle(items);
+    var b=el('<div><h2>Bước 3: Chọn tất cả ô có hoa</h2><div class="grid" id="g"></div><p class="msg" id="m"></p><div class="row"><button class="primary" id="v">Xác nhận</button></div></div>');
+    stage.appendChild(b);
+    var g=b.querySelector('#g'), m=b.querySelector('#m');
+    items.forEach(function(it){
+      var c=el('<button class="cell" aria-pressed="false" aria-label="'+(it[1]?'hoa':'không phải hoa')+'">'+it[0]+'</button>');
+      c.onclick=function(){c.setAttribute('aria-pressed',c.getAttribute('aria-pressed')==='true'?'false':'true');};
+      g.appendChild(c);
+    });
+    b.querySelector('#v').onclick=function(){
+      var cells=g.children, ok=true, any=false;
+      for(var i=0;i<items.length;i++){
+        var on=cells[i].getAttribute('aria-pressed')==='true'; if(on) any=true;
+        if(on!==!!items[i][1]) ok=false;
+      }
+      if(ok&&any){go(3);} else fail(b,m,'Chưa đúng. Pizza và cái tất không phải hoa nha, chọn lại đi.');
+    };
+  }
+
+  function s3(){
+    var b=el('<div><h2>Bước 4: Hôm nay là ngày gì?</h2><div class="opts" id="o"></div><p class="msg" id="m"></p></div>');
+    stage.appendChild(b);
+    var m=b.querySelector('#m'), o=b.querySelector('#o');
+    var opts=[['8/3',0,'Nhầm rồi, 8/3 là tháng 3 cơ.'],['20/10',1],['20/11',0,'20/11 là ngày Nhà giáo. Gần đúng nhưng chưa phải.'],['1/6',0,'1/6 là Quốc tế Thiếu nhi. Lớn rồi mà.']];
+    opts.forEach(function(x){
+      var c=el('<button class="opt">'+x[0]+'</button>');
+      c.onclick=function(){ if(x[1]){go(4);} else fail(b,m,x[2]); };
+      o.appendChild(c);
+    });
+  }
+
+  function s4(){
+    var words=['ULTR TUI KIU'];
+    var w=words[Math.floor(Math.random()*words.length)];
+    var b=el('<div><h2>Bước 5: Gõ lại mã bên dưới</h2><div class="code" aria-label="Mã xác minh '+w+'">'+w+'</div><input id="i" type="text" autocomplete="off" autocapitalize="characters" placeholder="Nhập mã ở đây" aria-label="Nhập mã"><p class="msg" id="m"></p><div class="row"><button class="primary" id="v">Mở lời chúc</button></div></div>');
+    stage.appendChild(b);
+    var i=b.querySelector('#i'), m=b.querySelector('#m');
+    function check(){
+      if(i.value.trim().toUpperCase()===w){go(5);} else fail(b,m,'Mã chưa khớp. Gõ đúng '+w+' nhé, không cần phân biệt hoa thường.');
+    }
+    b.querySelector('#v').onclick=check;
+    i.onkeydown=function(e){if(e.key==='Enter')check();};
+  }
+
+  function bloom(){
+    var set=['🌸','🌷','🌹','💮','🌺'];
+    for(var k=0;k<44;k++){
+      var s=document.createElement('span'); s.className='petal'; s.textContent=set[k%set.length];
+      s.style.left=Math.random()*100+'vw'; s.style.fontSize=(18+Math.random()*20)+'px';
+      s.style.animationDuration=(3+Math.random()*3)+'s'; s.style.animationDelay=(Math.random()*1.4)+'s';
+      document.body.appendChild(s);
+      (function(x){setTimeout(function(){x.remove();},8500);})(s);
+    }
+  }
+
+  var WISH="Chúc tất cả các bạn nữ một ngày 20/10 thật vui. Chúc các bạn luôn xinh đẹp theo cách của riêng mình, khỏe mạnh, tự tin và làm được mọi điều mình muốn. Cảm ơn các bạn vì đã làm cho mọi ngày bình thường trở nên đáng nhớ hơn.";
+  function fin(){
+    var b=el('<div class="final"><h2>Chúc mừng 20/10!</h2><div class="msgbox" id="mb"></div><div class="row" style="justify-content:center"><button class="primary" id="c">Sao chép lời chúc</button><button class="ghost" id="a">Hoa nữa</button><button class="ghost" id="p">Chơi lại</button></div><p class="msg" id="m"></p></div>');
+    stage.appendChild(b);
+    var m=b.querySelector('#m');
+    
+    b.querySelector('#a').onclick=bloom;
+    b.querySelector('#p').onclick=function(){go(0);};
+    b.querySelector('#c').onclick=function(){
+      var txt='Chúc mừng 20/10!\n\n'+WISH;
+      try{navigator.clipboard.writeText(txt).then(function(){m.textContent='Đã sao chép';},function(){m.textContent='Không sao chép được, hãy chép tay nhé';});}
+      catch(e){m.textContent='Không sao chép được, hãy chép tay nhé';}
+    };
+    bloom();
+    type(b.querySelector('#mb'),WISH+' Hôm nay hãy để người khác lo, các bạn chỉ cần vui thôi. 🌷');
+  }
+
+  var nhac=document.getElementById('nhac'), cover=document.getElementById('cover'), mtog=document.getElementById('mtog');
+  nhac.src=AUDIO_SRC;
+  document.getElementById('open').onclick=function(){
+    try{var pr=nhac.play(); if(pr&&pr.catch)pr.catch(function(){});}catch(e){}
+    cover.classList.add('hide'); mtog.classList.add('on'); mtog.textContent='🔊';
+  };
+  mtog.onclick=function(){
+    if(nhac.paused){nhac.play(); mtog.textContent='🔊';} else {nhac.pause(); mtog.textContent='🔇';}
+  };
+  go(0);
+})();
+</script>
+</body>
+</html>
